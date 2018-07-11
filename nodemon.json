@@ -1,0 +1,18 @@
+{
+	"ignore": [
+		".git",
+		"node_modules/*",
+		"htdocs/*",
+		".vscode",
+		"webpack.config.js",
+		"test/*",
+		"user-store/*",
+		"src/*",
+		"dist/log.txt",
+		"dist/modules/helper/logger.log",
+		"dist/config.json"
+	],
+	"env": {
+		"NODE_ENV": "development"
+	}
+}

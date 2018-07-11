@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "es6",
+		"moduleResolution": "node",
+		"lib": [
+			"dom",
+			"es7"
+		],
+		"outDir": "dist",
+		"types": [
+			"vue",
+			"socket.io"
+		],
+		"typeRoots": [
+			"node_modules/@types",
+			"node_modules/technicalindicators/declarations"
+		],
+		"sourceMap": true
+	},
+	"exclude": [
+		"_depr",
+		"node_modules",
+		"src/backend"
+	]
+}
