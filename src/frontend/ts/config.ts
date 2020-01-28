@@ -4,7 +4,7 @@ import { bus, SnackbarMessage } from './bus';
 interface DomainConfig {
 	tld: string,
 	subdomains: Array<string>,
-	upstream: { [subdomain: string]: number }
+	upstream: { [subdomain: string]: { addr: string, port: number } }
 }
 
 interface SSLZone {

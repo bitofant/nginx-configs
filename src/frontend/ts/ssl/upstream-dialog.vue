@@ -14,7 +14,8 @@
 				Would you like to configure this subdomain as an upstream service?
 				<v-layout align-center>
 					<v-checkbox v-model="useUpstream" hide-details class="shrink mr-2" color="primary"></v-checkbox>
-					<v-text-field :disabled="!useUpstream" label="Upstream port" mask="#####" v-model="upstreamPort" @keypress="txtKeyPress" />
+					<v-text-field :disabled="!useUpstream" label="Upstream Address" v-model="upstreamAddr" @keypress="txtKeyAddrPress" />
+					<v-text-field :disabled="!useUpstream" label="Upstream Port" mask="#####" v-model="upstreamPort" @keypress="txtKeyPortPress" ref="addr" />
 				</v-layout>
 			</v-card-text>
 
@@ -40,24 +41,39 @@
 				visible: false,
 				listener: null,
 				useUpstream: false,
+				upstreamAddr: '127.0.0.1',
 				upstreamPort: 8080
 			}
 		},
 		methods: {
-			show (item : string, upstream : number, callback : (response : string) => void) {
+			show (item : string, upstream : false|{ addr: string, port: number }, callback : (response : false|{addr:string,port:number}) => void) {
 				this.subdomain = item;
 				this.listener = callback;
 				this.useUpstream = !!upstream;
-				this.upstreamPort = upstream || 8080;
+				this.upstreamAddr = upstream ? upstream.addr : '127.0.0.1';
+				this.upstreamPort = upstream ? upstream.port : 8080;
 				this.visible = true;
 			},
-			txtKeyPress (ev) {
+			txtKeyAddrPress (ev : KeyboardEvent) {
 				var key = ev.keyCode || ev.which || ev.charCode;
-				if (key === 13 || key === 10) this.apply ();
+				if (key === 13 || key === 10) {
+					ev.preventDefault ();
+					this.$refs.addr.focus ();
+				}
+			},
+			txtKeyPortPress (ev : KeyboardEvent) {
+				var key = ev.keyCode || ev.which || ev.charCode;
+				if (key === 13 || key === 10) {
+					ev.preventDefault ();
+					this.apply ();
+				}
 			},
 			apply () {
 				this.visible = false;
-				this.listener (this.useUpstream && parseInt (this.upstreamPort));
+				this.listener (this.useUpstream && {
+					addr: this.upstreamAddr,
+					port: parseInt (this.upstreamPort)
+				});
 			}
 		}
 	});

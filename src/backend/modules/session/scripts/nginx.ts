@@ -1,8 +1,6 @@
 import { SSLZone } from "../../config";
 
-const base = `
-
-#
+const base = `#
 # Default server
 #
 server {
@@ -136,8 +134,7 @@ $(php)	}
 			deny all;
 			return 404;
 	}
-}
-`;
+}`;
 
 function createNginxConfig (zone : SSLZone) : string {
 	var domains : Array<string> = [];

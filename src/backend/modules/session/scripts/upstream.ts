@@ -2,7 +2,7 @@ import { SSLZone } from "../../config";
 
 const base = `
 upstream $(url) {
-	server 127.0.0.1:$(port);
+	server $(addr):$(port);
 }
 
 server {
@@ -46,10 +46,11 @@ server {
 }
 `;
 
-function createNginxUpstreamConfig (zone : SSLZone, domain : string, subdomain : string, port : number) : string {
+function createNginxUpstreamConfig (zone : SSLZone, domain : string, subdomain : string, upstream : { addr: string, port: number }) : string {
 	var replace = {
 		url: subdomain + '.' + domain,
-		port,
+		addr: upstream.addr,
+		port: upstream.port,
 		'cert.fullchain': zone.certFullChain,
 		'cert.key': zone.certPrivateKey
 	};

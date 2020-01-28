@@ -7,7 +7,7 @@ const log = Logger (module);
 interface DomainConfig {
 	tld: string,
 	subdomains: Array<string>,
-	upstream: { [subdomain: string]: number }
+	upstream: { [subdomain: string]: { addr: string, port: number } }
 }
 
 interface SSLZone {

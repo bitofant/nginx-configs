@@ -41,12 +41,12 @@
 								<v-flex xs12>
 									<v-list two-line>
 										<template v-for="item in uniqueSubdomains">
-											<v-list-tile :key="item" avatar>
+											<v-list-tile :key="item" avatar :ref="'subdomain-' + item">
 												<v-avatar class="white--text" :class="isUpstream.includes (item) ? 'secondary' : 'primary'" v-text="item.substr (0, 1).toUpperCase ()" />
 												<v-list-tile-content>
 													<v-list-tile-title>
 														&nbsp; <span style="font-weight:bold" v-text="item" />
-														<span v-if="isUpstream.includes (item)" v-text="' :' + upstream[item]" />
+														<span v-if="isUpstream.includes (item)" v-text="prettyAddress (upstream[item])" />
 													</v-list-tile-title>
 													<v-list-tile-sub-title>
 														<template>
@@ -174,8 +174,12 @@
 					if (this.upstream[k]) this.isUpstream.push (k);
 				}
 			},
-			domainsChanged (val) {
-				// console.log ('Domains changed: ' + val.join (', '));
+			prettyAddress (upstream : { addr: string, port: number }) {
+				const { addr, port } = upstream;
+				return (addr === '127.0.0.1' ? '' : addr) + ':' + port;
+			},
+			domainsChanged (val : string[]) {
+				// let zone : SSLZone = this.zone;
 			},
 			subdomainKeyPress (ev) {
 				var key = ev.keyCode || ev.which || ev.charCode;
@@ -190,15 +194,16 @@
 				if (!this.upstream[dom]) this.upstream[dom] = 0;
 			},
 			createUpstream (item) {
-				this.$refs.upstreamDialog.show (item, this.upstream[item], response => {
+				this.$refs.upstreamDialog.show (item, this.upstream[item], (response: false|{address: string, port: number}) => {
 					console.log (item, response);
-					this.upstream[item] = response || 0;
-					var index = this.isUpstream.findIndex (t => t === item);
-					if (index >= 0) this.isUpstream.splice (index, 1);
-					else console.error ('unable to remove from isUpstream');
-					if (response) {
-						this.isUpstream.push (item);
+					this.upstream[item] = response;
+					let index = this.isUpstream.findIndex (t => t === item);
+					if (!response) {
+						if (index >= 0) this.isUpstream.splice (index, 1);
+					} else {
+						if (index < 0) this.isUpstream.push (item);
 					}
+					this.$forceUpdate ();
 				});
 			},
 			remove (subdomain : string) {
@@ -215,12 +220,13 @@
 				var zone : SSLZone = this.zone;
 				var configs : Array<DomainConfig> = [];
 				this.domains.forEach (tld => {
+					console.log(tld);
 					var subdomains : Array<string> = [];
 					this.subdomains.forEach (subdomain => {
 						if (!subdomain.endsWith (tld)) return;
 						subdomains.push (subdomain.substr (0, subdomain.length - tld.length - 1));
 					});
-					var upstream : { [subdomain: string]: number } = {};
+					var upstream : { [subdomain: string]: { addr: string, port: number } } = {};
 					for (var k in this.upstream) {
 						if (!this.upstream[k]) continue;
 						if (!subdomains.includes (k)) continue;
@@ -233,8 +239,8 @@
 					};
 					configs.push (cfg);
 				});
-				var args : Array<any> = [ 0, zone.domainConfigs.length ];
-				zone.domainConfigs.splice.apply (zone.domainConfigs, args.concat (configs));
+				zone.domainConfigs.splice (0, zone.domainConfigs.length, ...configs);
+				// zone.domainConfigs.splice.apply (zone.domainConfigs,  configs);
 				sock.emit ('zone:domains', {
 					zone: zone.name,
 					domainConfigs: zone.domainConfigs
